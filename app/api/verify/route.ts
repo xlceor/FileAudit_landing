@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server';
-import { supabase } from '@/lib/supabase';
+import postgres from 'postgres';
 import { signLicenseToken } from '@/lib/jwt';
+
+const sql = postgres(process.env.POSTGRES_URL!, { ssl: 'require' });
 
 export async function POST(request: Request) {
   try {
@@ -10,13 +12,14 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Missing parameters' }, { status: 400 });
     }
 
-    const { data: license, error } = await supabase
-      .from('licenses')
-      .select('*')
-      .eq('license_key', key)
-      .single();
+    const licenses = await sql`
+      SELECT * FROM licenses 
+      WHERE license_key = ${key}
+      LIMIT 1
+    `;
+    const license = licenses[0];
 
-    if (error || !license) {
+    if (!license) {
       return NextResponse.json({ error: 'Invalid License Key' }, { status: 403 });
     }
 
@@ -29,17 +32,17 @@ export async function POST(request: Request) {
     }
 
     if (license.status === 'unused') {
-      const { error: updateError } = await supabase
-        .from('licenses')
-        .update({ status: 'activated', machine_fingerprint: fingerprint, last_validated_at: new Date().toISOString() })
-        .eq('id', license.id);
-      
-      if (updateError) throw updateError;
+      await sql`
+        UPDATE licenses 
+        SET status = 'activated', machine_fingerprint = ${fingerprint}, last_validated_at = ${new Date().toISOString()}
+        WHERE id = ${license.id}
+      `;
     } else {
-      await supabase
-        .from('licenses')
-        .update({ last_validated_at: new Date().toISOString() })
-        .eq('id', license.id);
+      await sql`
+        UPDATE licenses 
+        SET last_validated_at = ${new Date().toISOString()}
+        WHERE id = ${license.id}
+      `;
     }
 
     const token = signLicenseToken({ key, fingerprint });

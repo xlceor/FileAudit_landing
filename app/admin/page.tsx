@@ -1,40 +1,37 @@
-'use client';
+import { auth } from '@/auth';
+import postgres from 'postgres';
+import { redirect } from 'next/navigation';
+import AdminDashboardClient from './AdminDashboardClient';
 
-import { useEffect, useState } from 'react';
-import { supabase } from '@/lib/supabase';
+const sql = postgres(process.env.POSTGRES_URL!, { ssl: 'require' });
 
-export default function AdminDashboard() {
-  const [licenses, setLicenses] = useState<any[]>([]);
+export default async function AdminDashboard() {
+  const session = await auth();
 
-  useEffect(() => {
-    async function fetchLicenses() {
-      const { data } = await supabase.from('licenses').select('*');
-      setLicenses(data || []);
-    }
-    fetchLicenses();
-  }, []);
+  if (!session) {
+    redirect('/auth/login');
+  }
+
+  // Fetch licenses directly in the Server Component
+  const licenses = await sql`
+    SELECT * FROM licenses 
+    ORDER BY created_at DESC
+  `;
+
+  // Standardize database outputs for client delivery
+  const serializedLicenses = licenses.map((lic: any) => ({
+    id: lic.id,
+    license_key: lic.license_key,
+    status: lic.status,
+    machine_fingerprint: lic.machine_fingerprint || null,
+    created_at: lic.created_at ? new Date(lic.created_at).toISOString() : null,
+    last_validated_at: lic.last_validated_at ? new Date(lic.last_validated_at).toISOString() : null,
+  }));
 
   return (
-    <div className="p-8">
-      <h1 className="text-2xl font-bold mb-4">License Administration</h1>
-      <table className="w-full border-collapse border border-gray-300">
-        <thead>
-          <tr className="bg-gray-100">
-            <th className="border p-2">Key</th>
-            <th className="border p-2">Status</th>
-            <th className="border p-2">Last Validated</th>
-          </tr>
-        </thead>
-        <tbody>
-          {licenses.map((lic) => (
-            <tr key={lic.id}>
-              <td className="border p-2">{lic.license_key}</td>
-              <td className="border p-2">{lic.status}</td>
-              <td className="border p-2">{lic.last_validated_at || 'Never'}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
+    <AdminDashboardClient 
+      initialLicenses={serializedLicenses} 
+      userEmail={session.user?.email || 'admin@filemaster.enterprise'} 
+    />
   );
 }
