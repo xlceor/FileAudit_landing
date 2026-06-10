@@ -57,15 +57,24 @@ interface Release {
   created_at: string | null;
 }
 
+interface Trial {
+  id: string;
+  machine_fingerprint: string;
+  start_date: string | null;
+  files_processed: number;
+}
+
 interface AdminDashboardClientProps {
   initialLicenses: License[];
   initialReleases: Release[];
+  initialTrials: Trial[];
   userEmail: string;
 }
 
-export default function AdminDashboardClient({ initialLicenses, initialReleases = [], userEmail }: AdminDashboardClientProps) {
+export default function AdminDashboardClient({ initialLicenses, initialReleases = [], initialTrials = [], userEmail }: AdminDashboardClientProps) {
   const [licenses, setLicenses] = useState<License[]>(initialLicenses);
   const [releases, setReleases] = useState<Release[]>(initialReleases);
+  const [trials, setTrials] = useState<Trial[]>(initialTrials);
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState<'all' | 'unused' | 'activated' | 'revoked'>('all');
   const [generateCount, setGenerateCount] = useState(5);
@@ -272,37 +281,76 @@ export default function AdminDashboardClient({ initialLicenses, initialReleases 
         )}
 
         {/* Global Analytics Overview Row */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6">
           <div className="bg-slate-900/40 border border-slate-800 p-6 rounded-2xl relative">
             <div className="absolute top-6 right-6 text-slate-700"><Key className="h-6 w-6" /></div>
-            <span className="text-xs text-slate-400 font-bold uppercase tracking-wider block mb-1">Total Licenses issued</span>
+            <span className="text-xs text-slate-400 font-bold uppercase tracking-wider block mb-1">Total Licenses</span>
             <span className="text-3xl font-black text-white">{licenses.length}</span>
-            <p className="text-[10px] text-slate-500 mt-2 font-mono">Count holds active, unused, revoked</p>
           </div>
 
           <div className="bg-slate-900/40 border border-slate-800 p-6 rounded-2xl relative">
             <div className="absolute top-6 right-6 text-emerald-800"><CheckCircle2 className="h-6 w-6" /></div>
             <span className="text-xs text-slate-400 font-bold uppercase tracking-wider block mb-1">Active Bindings</span>
             <span className="text-3xl font-black text-emerald-400">{activatedCount}</span>
-            <p className="text-[10px] text-emerald-500/80 mt-2 font-mono">Tied securely to host motherboard BIOS</p>
           </div>
 
           <div className="bg-slate-900/40 border border-slate-800 p-6 rounded-2xl relative">
             <div className="absolute top-6 right-6 text-violet-800"><Sparkles className="h-6 w-6" /></div>
             <span className="text-xs text-slate-400 font-bold uppercase tracking-wider block mb-1">Available Keys</span>
             <span className="text-3xl font-black text-violet-400">{unusedCount}</span>
-            <p className="text-[10px] text-violet-500/80 mt-2 font-mono">Awaiting customer activations</p>
+          </div>
+
+          <div className="bg-slate-900/40 border border-slate-800 p-6 rounded-2xl relative">
+            <div className="absolute top-6 right-6 text-amber-800"><Clock className="h-6 w-6" /></div>
+            <span className="text-xs text-slate-400 font-bold uppercase tracking-wider block mb-1">Active Trials</span>
+            <span className="text-3xl font-black text-amber-400">{trials.length}</span>
           </div>
 
           <div className="bg-slate-900/40 border border-slate-800 p-6 rounded-2xl relative">
             <div className="absolute top-6 right-6 text-rose-800"><ArrowUpCircle className="h-6 w-6" /></div>
-            <span className="text-xs text-slate-400 font-bold uppercase tracking-wider block mb-1">OTA App Release</span>
+            <span className="text-xs text-slate-400 font-bold uppercase tracking-wider block mb-1">OTA Release</span>
             <span className="text-3xl font-black text-violet-400">
               {releases.find(r => r.is_active)?.version || 'None'}
             </span>
-            <p className="text-[10px] text-slate-500 mt-2 font-mono">Active version for desktop client updates</p>
           </div>
         </div>
+
+        {/* ==================== TRIALS SECTION ==================== */}
+        <section className="border border-slate-800 rounded-3xl p-6 bg-slate-900/20 relative space-y-6">
+          <div className="flex items-center gap-3 border-b border-slate-800/80 pb-4">
+            <Clock className="h-6 w-6 text-amber-400" />
+            <div>
+              <h2 className="font-extrabold text-base text-white tracking-tight">Active Trials</h2>
+              <p className="text-slate-400 text-xs mt-0.5">Manage and monitor current hardware-locked trial deployments.</p>
+            </div>
+          </div>
+          <div className="border border-slate-850 rounded-2xl overflow-hidden bg-slate-950">
+            <table className="w-full text-left border-collapse text-xs">
+              <thead>
+                <tr className="bg-slate-900 border-b border-slate-850 text-[10px] text-slate-400 font-extrabold uppercase tracking-widest">
+                  <th className="p-4 pl-6">Hardware Fingerprint</th>
+                  <th className="p-4">Start Date</th>
+                  <th className="p-4">Files Processed</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-850 text-slate-300">
+                {trials.length === 0 ? (
+                  <tr>
+                    <td colSpan={3} className="text-center p-6 text-slate-500 font-mono">No active trials.</td>
+                  </tr>
+                ) : (
+                  trials.map((t) => (
+                    <tr key={t.id} className="hover:bg-slate-900/10 transition-all">
+                      <td className="p-4 pl-6 font-mono text-slate-400">{t.machine_fingerprint}</td>
+                      <td className="p-4 font-mono">{t.start_date ? new Date(t.start_date).toLocaleDateString() : '—'}</td>
+                      <td className="p-4 font-mono text-amber-400">{t.files_processed} / 50</td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
+        </section>
 
         {/* ==================== OTA UPDATES & APP RELEASES SECTION ==================== */}
         <section className="border border-slate-800 rounded-3xl p-6 bg-slate-900/20 relative space-y-6">

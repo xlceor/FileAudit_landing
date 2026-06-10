@@ -1,13 +1,30 @@
 import { NextResponse } from 'next/server';
 import postgres from 'postgres';
 import { signLicenseToken } from '@/lib/jwt';
+import jwt from 'jsonwebtoken';
 
 const sql = postgres(process.env.POSTGRES_URL!, { ssl: 'require' });
 
 export async function POST(request: Request) {
   try {
-    const { key, fingerprint } = await request.json();
+    const body = await request.json();
+    const { key, fingerprint, lease_token } = body;
 
+    // Handle Trial Verification
+    if (lease_token) {
+        try {
+            const decoded = jwt.verify(lease_token, process.env.JWT_PUBLIC_KEY_PEM || "") as any; // Note: Need to ensure public key access
+            if (decoded.trial) {
+                const trials = await sql`SELECT * FROM trials WHERE machine_fingerprint = ${fingerprint}`;
+                if (trials.length === 0) return NextResponse.json({ error: 'Trial not found' }, { status: 403 });
+                return NextResponse.json({ valid: true, trial: true });
+            }
+        } catch (e) {
+            return NextResponse.json({ error: 'Invalid lease token' }, { status: 403 });
+        }
+    }
+
+    // Handle Standard License Verification
     if (!key || !fingerprint) {
       return NextResponse.json({ error: 'Missing parameters' }, { status: 400 });
     }

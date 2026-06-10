@@ -24,6 +24,12 @@ export default async function AdminDashboard() {
     ORDER BY created_at DESC
   `;
 
+  // Fetch trials
+  const trials = await sql`
+    SELECT * FROM trials
+    ORDER BY start_date DESC
+  `;
+
   // Standardize database outputs for client delivery
   const serializedLicenses = licenses.map((lic: any) => ({
     id: lic.id,
@@ -43,10 +49,18 @@ export default async function AdminDashboard() {
     created_at: rel.created_at ? new Date(rel.created_at).toISOString() : null,
   }));
 
+  const serializedTrials = trials.map((t: any) => ({
+    id: t.id,
+    machine_fingerprint: t.machine_fingerprint,
+    start_date: t.start_date ? new Date(t.start_date).toISOString() : null,
+    files_processed: t.files_processed || 0,
+  }));
+
   return (
     <AdminDashboardClient 
       initialLicenses={serializedLicenses} 
       initialReleases={serializedReleases}
+      initialTrials={serializedTrials}
       userEmail={session.user?.email || 'admin@filemaster.enterprise'} 
     />
   );
