@@ -1,27 +1,51 @@
-import React from 'react';
+'use client';
+
+import React, { useState, useEffect } from 'react';
 import { 
   FileSpreadsheet, 
   Search, 
   RefreshCw, 
   ShieldCheck, 
-  Code, 
   Layers, 
-  Workflow, 
   Zap, 
   Sparkles, 
-  Cpu, 
   FileCode, 
   Database,
   ArrowRight,
   Fingerprint,
   RotateCw,
-  XCircle,
   HelpCircle,
-  HardDrive
+  HardDrive,
+  CheckCircle2,
+  AlertCircle,
+  FileSearch,
+  Check,
+  Building,
+  Clock,
+  ShieldAlert,
+  ClipboardCheck,
+  CheckSquare,
+  Globe
 } from 'lucide-react';
 import Link from 'next/link';
+import { translations } from './translations';
 
 export default function LandingPage() {
+  const [lang, setLang] = useState('en');
+
+  useEffect(() => {
+    const browserLang = navigator.language.split('-')[0];
+    if (browserLang === 'es') {
+      setLang('es');
+    }
+  }, []);
+
+  const t = translations[lang as keyof typeof translations] || translations.en;
+
+  const toggleLanguage = () => {
+    setLang(prev => prev === 'en' ? 'es' : 'en');
+  };
+
   return (
     <div className="bg-slate-950 text-slate-100 min-h-screen selection:bg-violet-500 selection:text-white font-sans overflow-x-hidden">
       
@@ -38,49 +62,60 @@ export default function LandingPage() {
           </div>
           
           <nav className="hidden md:flex items-center gap-8 text-sm font-medium text-slate-400">
-            <a href="#about" className="hover:text-violet-400 transition-colors">About</a>
-            <a href="#features" className="hover:text-violet-400 transition-colors">Features</a>
-            <a href="#how-it-works" className="hover:text-violet-400 transition-colors">How it Works</a>
-            <a href="#licensing" className="hover:text-violet-400 transition-colors">Licensing Model</a>
-            <a href="#faq" className="hover:text-violet-400 transition-colors">FAQ</a>
+            <a href="#about" className="hover:text-violet-400 transition-colors">{t.nav.about}</a>
+            <a href="#problems" className="hover:text-violet-400 transition-colors">{t.nav.problems}</a>
+            <a href="#how-it-works" className="hover:text-violet-400 transition-colors">{t.nav.howItWorks}</a>
+            <a href="#benefits" className="hover:text-violet-400 transition-colors">{t.nav.benefits}</a>
+            <a href="#licensing" className="hover:text-violet-400 transition-colors">{t.nav.licensing}</a>
+            <a href="#faq" className="hover:text-violet-400 transition-colors">{t.nav.faq}</a>
           </nav>
 
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-3">
+            {/* Language Switcher Button */}
+            <button 
+              onClick={toggleLanguage}
+              className="flex items-center gap-1.5 text-xs font-semibold text-slate-400 hover:text-white bg-slate-900 border border-slate-800 px-3 py-2 rounded-xl transition-all"
+              title="Change Language / Cambiar Idioma"
+            >
+              <Globe className="h-3.5 w-3.5 text-violet-400" />
+              <span>{lang.toUpperCase()}</span>
+            </button>
+
             <Link 
               href="/auth/login" 
-              className="text-sm font-semibold text-slate-300 hover:text-white bg-slate-900 border border-slate-800 px-4 py-2 rounded-xl hover:bg-slate-800/80 transition-all shadow-inner"
+              className="text-xs sm:text-sm font-semibold text-slate-300 hover:text-white bg-slate-900 border border-slate-800 px-4 py-2 rounded-xl hover:bg-slate-800/80 transition-all shadow-inner"
             >
-              Admin Portal
+              {t.nav.adminPortal}
             </Link>
             <a 
               href="#download" 
               className="hidden sm:inline-flex items-center gap-2 text-sm font-bold bg-gradient-to-r from-violet-600 to-indigo-600 text-white px-5 py-2.5 rounded-xl shadow-lg shadow-violet-500/20 hover:shadow-violet-500/40 hover:-translate-y-0.5 transition-all"
             >
-              Get Desktop App <ArrowRight className="h-4 w-4" />
+              {t.nav.getDesktopApp} <ArrowRight className="h-4 w-4" />
             </a>
           </div>
         </div>
       </header>
 
       {/* Hero Section */}
-      <section className="relative pt-36 pb-24 px-6 max-w-7xl mx-auto flex flex-col items-center text-center overflow-hidden">
+      <section className="relative pt-36 pb-20 px-6 max-w-7xl mx-auto flex flex-col items-center text-center overflow-hidden">
         {/* Glow Effects */}
         <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-violet-600/10 rounded-full blur-[120px] pointer-events-none" />
         <div className="absolute top-1/3 left-1/3 -translate-x-1/2 -translate-y-1/2 w-[350px] h-[350px] bg-indigo-600/10 rounded-full blur-[100px] pointer-events-none" />
 
-        <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-900 border border-violet-500/20 text-xs font-semibold text-violet-400 mb-8 animate-pulse shadow-inner">
-          <Sparkles className="h-3.5 w-3.5" /> High-Performance Desktop Audit Suite
+        <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-900 border border-violet-500/20 text-xs font-semibold text-violet-400 mb-8 shadow-inner">
+          <Sparkles className="h-3.5 w-3.5 text-violet-500" /> {t.hero.tagline}
         </div>
 
         <h1 className="text-4xl sm:text-6xl lg:text-7xl font-black tracking-tight max-w-5xl leading-[1.1] mb-6">
-          Reconcile files with your database at{' '}
+          {t.hero.title1} {' '}
           <span className="bg-clip-text text-transparent bg-gradient-to-r from-violet-400 via-indigo-400 to-purple-400">
-            Light Speed
+            {t.hero.titleHighlight}
           </span>
         </h1>
 
         <p className="text-slate-400 text-base sm:text-xl max-w-3xl leading-relaxed mb-10">
-          FileMaster solves the core data integrity issue: matching physical directories and storage dumps against master records in Excel, CSV, or JSON formats. Perfect for high-volume enterprise pipelines.
+          {t.hero.description}
         </p>
 
         <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
@@ -88,13 +123,13 @@ export default function LandingPage() {
             href="#download" 
             className="w-full sm:w-auto inline-flex items-center justify-center gap-2 text-base font-bold bg-gradient-to-r from-violet-600 to-indigo-600 text-white px-8 py-4 rounded-2xl shadow-xl shadow-violet-500/30 hover:shadow-violet-500/50 hover:-translate-y-0.5 transition-all"
           >
-            Download Desktop Client <ArrowRight className="h-5 w-5" />
+            {t.hero.downloadButton} <ArrowRight className="h-5 w-5" />
           </a>
           <a 
-            href="#features" 
+            href="#problems" 
             className="w-full sm:w-auto inline-flex items-center justify-center gap-2 text-base font-bold bg-slate-900 border border-slate-800 text-slate-300 hover:text-white px-8 py-4 rounded-2xl hover:bg-slate-800/80 transition-all"
           >
-            Explore Core Engines
+            {t.hero.exploreButton}
           </a>
         </div>
 
@@ -107,32 +142,32 @@ export default function LandingPage() {
               <span className="w-3.5 h-3.5 rounded-full bg-yellow-500/80 block" />
               <span className="w-3.5 h-3.5 rounded-full bg-green-500/80 block" />
             </div>
-            <div className="text-xs font-mono text-slate-500 bg-slate-950 px-4 py-1 rounded-md border border-slate-800/50">
-              FileMaster Desktop — Operation: Folder vs Master Excel
+            <div className="text-xs font-mono text-slate-400 bg-slate-950 px-4 py-1 rounded-md border border-slate-800/50">
+              {t.hero.dashboard.operation}
             </div>
             <div className="w-10" />
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4 text-left">
-            <div className="bg-slate-950 p-4 rounded-xl border border-slate-800">
-              <div className="text-xs text-slate-400 font-bold uppercase mb-1">Expected Records</div>
+            <div className="bg-slate-950 p-4 rounded-xl border border-slate-800/60">
+              <div className="text-xs text-slate-400 font-bold uppercase mb-1">{t.hero.stats.expected}</div>
               <div className="text-2xl font-black text-violet-400">125,480</div>
-              <div className="text-[10px] text-slate-500 mt-1">Master Excel database load</div>
+              <div className="text-[10px] text-slate-500 mt-1">{t.hero.stats.databaseLoad}</div>
             </div>
-            <div className="bg-slate-950 p-4 rounded-xl border border-slate-800">
-              <div className="text-xs text-slate-400 font-bold uppercase mb-1">Found (Encontrados)</div>
+            <div className="bg-slate-950 p-4 rounded-xl border border-slate-800/60">
+              <div className="text-xs text-slate-400 font-bold uppercase mb-1">{t.hero.stats.found}</div>
               <div className="text-2xl font-black text-emerald-400">121,043</div>
-              <div className="text-[10px] text-emerald-500/80 mt-1">[OK] 96.4% Completion Arc</div>
+              <div className="text-[10px] text-emerald-500/80 mt-1">{t.hero.stats.completionArc}</div>
             </div>
-            <div className="bg-slate-950 p-4 rounded-xl border border-slate-800">
-              <div className="text-xs text-slate-400 font-bold uppercase mb-1">Missing (Faltantes)</div>
+            <div className="bg-slate-950 p-4 rounded-xl border border-slate-800/60">
+              <div className="text-xs text-slate-400 font-bold uppercase mb-1">{t.hero.stats.missing}</div>
               <div className="text-2xl font-black text-rose-500">4,127</div>
-              <div className="text-[10px] text-rose-500/80 mt-1"> Expected but not on disk</div>
+              <div className="text-[10px] text-rose-500/80 mt-1">{t.hero.stats.expectedNotOnDisk}</div>
             </div>
-            <div className="bg-slate-950 p-4 rounded-xl border border-slate-800">
-              <div className="text-xs text-slate-400 font-bold uppercase mb-1">Extra (Sobrantes)</div>
+            <div className="bg-slate-950 p-4 rounded-xl border border-slate-800/60">
+              <div className="text-xs text-slate-400 font-bold uppercase mb-1">{t.hero.stats.extra}</div>
               <div className="text-2xl font-black text-amber-500">310</div>
-              <div className="text-[10px] text-amber-500/80 mt-1">ℹ On disk but unrecorded</div>
+              <div className="text-[10px] text-amber-500/80 mt-1">{t.hero.stats.onDiskUnrecorded}</div>
             </div>
           </div>
 
@@ -140,339 +175,319 @@ export default function LandingPage() {
           <div className="mt-4 bg-slate-950 rounded-xl p-4 border border-slate-800 flex flex-col sm:flex-row items-center gap-6 justify-around">
             <div className="flex items-center gap-4">
               <div className="relative w-28 h-28 flex items-center justify-center">
-                {/* SVG circular progress representation */}
                 <svg className="absolute inset-0 w-full h-full transform -rotate-90">
                   <circle cx="56" cy="56" r="48" stroke="#1e293b" strokeWidth="8" fill="transparent" />
                   <circle cx="56" cy="56" r="48" stroke="#10b981" strokeWidth="8" fill="transparent" strokeDasharray="301.6" strokeDashoffset="10.8" />
                 </svg>
                 <div className="text-center">
                   <div className="text-lg font-black text-white">96.4%</div>
-                  <div className="text-[9px] text-slate-400 uppercase font-bold">Audit Score</div>
+                  <div className="text-[9px] text-slate-400 uppercase font-bold">{t.hero.stats.auditScore}</div>
                 </div>
               </div>
               <div className="text-left space-y-1">
-                <h4 className="text-sm font-bold text-slate-200">Reconciliation Successful</h4>
-                <p className="text-xs text-slate-400 max-w-xs">Set algebra logic mapped in 0.04s. Background worker thread returned safe process handle.</p>
+                <h4 className="text-sm font-bold text-slate-200">{t.hero.stats.reconciliationSuccessful}</h4>
+                <p className="text-xs text-slate-400 max-w-xs">{t.hero.stats.reconciliationDescription}</p>
               </div>
             </div>
 
             <div className="flex gap-2 self-stretch items-end h-24 pt-4 px-4 border-t sm:border-t-0 sm:border-l border-slate-800 w-full max-w-sm">
               <div className="flex-1 flex flex-col items-center gap-1 h-full justify-end">
                 <div className="w-full bg-emerald-500 rounded-t-sm" style={{ height: '95%' }} />
-                <span className="text-[9px] text-slate-500 font-bold">Found</span>
+                <span className="text-[9px] text-slate-500 font-bold">{t.hero.stats.found}</span>
               </div>
               <div className="flex-1 flex flex-col items-center gap-1 h-full justify-end">
                 <div className="w-full bg-rose-500 rounded-t-sm" style={{ height: '24%' }} />
-                <span className="text-[9px] text-slate-500 font-bold">Missing</span>
+                <span className="text-[9px] text-slate-500 font-bold">{t.hero.stats.missing}</span>
               </div>
               <div className="flex-1 flex flex-col items-center gap-1 h-full justify-end">
                 <div className="w-full bg-amber-500 rounded-t-sm" style={{ height: '8%' }} />
-                <span className="text-[9px] text-slate-500 font-bold">Extra</span>
+                <span className="text-[9px] text-slate-500 font-bold">{t.hero.stats.extra}</span>
               </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Operation Modes Showcase */}
-      <section id="about" className="py-20 px-6 max-w-7xl mx-auto border-t border-slate-900">
-        <div className="text-center mb-16">
-          <h2 className="text-xs text-violet-400 uppercase tracking-widest font-extrabold mb-3">Modular Engine Architectures</h2>
-          <p className="text-3xl sm:text-5xl font-black text-white max-w-3xl mx-auto tracking-tight leading-tight">
-            Designed for structural workflows & high payloads
+      {/* Trust & Real-world Validation Section */}
+      <section id="about" className="py-16 px-6 max-w-7xl mx-auto border-t border-slate-900 relative">
+        <div className="absolute top-1/2 left-1/4 w-[300px] h-[300px] bg-violet-600/5 rounded-full blur-[100px] pointer-events-none" />
+        
+        <div className="text-center mb-12">
+          <span className="text-xs text-violet-400 uppercase tracking-widest font-extrabold bg-violet-500/10 px-3 py-1 rounded-full border border-violet-500/20">{t.trust.tag}</span>
+          <h2 className="text-3xl sm:text-5xl font-black text-white mt-4 tracking-tight leading-tight">
+            {t.trust.title}
+          </h2>
+          <p className="text-slate-400 text-sm sm:text-base max-w-2xl mx-auto mt-3">
+            {t.trust.description}
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          <div className="bg-slate-900/30 border border-slate-800 p-8 rounded-2xl hover:border-violet-500/30 transition-all group relative">
-            <div className="absolute top-0 right-0 w-24 h-24 bg-violet-600/5 rounded-bl-full pointer-events-none group-hover:bg-violet-600/10 transition-colors" />
-            <div className="bg-violet-500/10 text-violet-400 p-4 rounded-xl w-fit mb-6 border border-violet-500/20">
-              <Layers className="h-6 w-6" />
+        {/* Highlight Metrics */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 mb-16">
+          <div className="bg-slate-900/40 border border-slate-800 p-6 rounded-2xl text-center">
+            <div className="bg-violet-500/10 text-violet-400 p-3 rounded-xl w-fit mx-auto mb-4 border border-violet-500/20">
+              <Clock className="h-6 w-6" />
             </div>
-            <h3 className="text-xl font-bold text-slate-100 mb-3 group-hover:text-violet-400 transition-colors">Folder Export Mode</h3>
-            <p className="text-slate-400 text-sm leading-relaxed mb-4">
-              Traverse target directories containing millions of files. Uses modern native system calls to map folder structures and export optimized, indexed files with active metadata templates automatically.
-            </p>
-            <ul className="text-xs text-slate-500 space-y-2 mt-4 border-t border-slate-800/80 pt-4 font-mono">
-              <li className="flex items-center gap-2"><div className="w-1.5 h-1.5 rounded-full bg-violet-500" /> Infinite recursive depth</li>
-              <li className="flex items-center gap-2"><div className="w-1.5 h-1.5 rounded-full bg-violet-500" /> Path clean up ({'{}'} standardizer)</li>
-              <li className="flex items-center gap-2"><div className="w-1.5 h-1.5 rounded-full bg-violet-500" /> Auto openpyxl styling</li>
-            </ul>
+            <div className="text-2xl sm:text-3xl font-black text-white">{t.trust.metric1.value}</div>
+            <div className="text-xs text-slate-400 mt-1">{t.trust.metric1.label}</div>
           </div>
 
-          <div className="bg-slate-900/30 border border-slate-800 p-8 rounded-2xl hover:border-violet-500/30 transition-all group relative">
-            <div className="absolute top-0 right-0 w-24 h-24 bg-violet-600/5 rounded-bl-full pointer-events-none group-hover:bg-violet-600/10 transition-colors" />
-            <div className="bg-violet-500/10 text-violet-400 p-4 rounded-xl w-fit mb-6 border border-violet-500/20">
-              <Workflow className="h-6 w-6" />
+          <div className="bg-slate-900/40 border border-slate-800 p-6 rounded-2xl text-center">
+            <div className="bg-violet-500/10 text-violet-400 p-3 rounded-xl w-fit mx-auto mb-4 border border-violet-500/20">
+              <Building className="h-6 w-6" />
             </div>
-            <h3 className="text-xl font-bold text-slate-100 mb-3 group-hover:text-violet-400 transition-colors">Folder vs. Master Excel</h3>
-            <p className="text-slate-400 text-sm leading-relaxed mb-4">
-              Reconciles physical folders against expected identifiers from multi-column corporate templates. Maps file stems, ignores trailing extensions, and outputs three precise categorical subsets.
-            </p>
-            <ul className="text-xs text-slate-500 space-y-2 mt-4 border-t border-slate-800/80 pt-4 font-mono">
-              <li className="flex items-center gap-2"><div className="w-1.5 h-1.5 rounded-full bg-violet-500" /> Prefix Extraction Preprocessing</li>
-              <li className="flex items-center gap-2"><div className="w-1.5 h-1.5 rounded-full bg-violet-500" /> Extension & Case-agnostic</li>
-              <li className="flex items-center gap-2"><div className="w-1.5 h-1.5 rounded-full bg-violet-500" /> O(1) set-algebra search complexity</li>
-            </ul>
+            <div className="text-2xl sm:text-3xl font-black text-white">{t.trust.metric2.value}</div>
+            <div className="text-xs text-slate-400 mt-1">{t.trust.metric2.label}</div>
           </div>
 
-          <div className="bg-slate-900/30 border border-slate-800 p-8 rounded-2xl hover:border-violet-500/30 transition-all group relative">
-            <div className="absolute top-0 right-0 w-24 h-24 bg-violet-600/5 rounded-bl-full pointer-events-none group-hover:bg-violet-600/10 transition-colors" />
-            <div className="bg-violet-500/10 text-violet-400 p-4 rounded-xl w-fit mb-6 border border-violet-500/20">
-              <FileCode className="h-6 w-6" />
+          <div className="bg-slate-900/40 border border-slate-800 p-6 rounded-2xl text-center">
+            <div className="bg-violet-500/10 text-violet-400 p-3 rounded-xl w-fit mx-auto mb-4 border border-violet-500/20">
+              <ShieldAlert className="h-6 w-6" />
             </div>
-            <h3 className="text-xl font-bold text-slate-100 mb-3 group-hover:text-violet-400 transition-colors">Excel vs. Master Excel</h3>
-            <p className="text-slate-400 text-sm leading-relaxed mb-4">
-              Performs direct data-source auditing without file-system scans. Compare an input sheet of records with your master sheet database, sniffing custom column patterns for precise match logic.
+            <div className="text-2xl sm:text-3xl font-black text-white">{t.trust.metric3.value}</div>
+            <div className="text-xs text-slate-400 mt-1">{t.trust.metric3.label}</div>
+          </div>
+
+          <div className="bg-slate-900/40 border border-slate-800 p-6 rounded-2xl text-center">
+            <div className="bg-violet-500/10 text-violet-400 p-3 rounded-xl w-fit mx-auto mb-4 border border-violet-500/20">
+              <ClipboardCheck className="h-6 w-6" />
+            </div>
+            <div className="text-2xl sm:text-3xl font-black text-white">{t.trust.metric4.value}</div>
+            <div className="text-xs text-slate-400 mt-1">{t.trust.metric4.label}</div>
+          </div>
+        </div>
+
+        {/* Origins Story card */}
+        <div className="bg-gradient-to-r from-violet-950/20 to-slate-900/40 border border-violet-500/20 rounded-3xl p-6 sm:p-10 flex flex-col lg:flex-row items-center gap-8">
+          <div className="bg-gradient-to-tr from-violet-600 to-indigo-600 p-4 sm:p-6 rounded-2xl shadow-xl shadow-violet-500/10 flex-shrink-0">
+            <Building className="h-10 sm:h-12 sm:w-12 text-white" />
+          </div>
+          <div>
+            <h3 className="text-xl sm:text-2xl font-bold text-white mb-3">
+              {t.trust.storyTitle}
+            </h3>
+            <p className="text-slate-300 text-sm sm:text-base leading-relaxed">
+              {t.trust.storyText}
             </p>
-            <ul className="text-xs text-slate-500 space-y-2 mt-4 border-t border-slate-800/80 pt-4 font-mono">
-              <li className="flex items-center gap-2"><div className="w-1.5 h-1.5 rounded-full bg-violet-500" /> Automatic CSV delimiter sniffing</li>
-              <li className="flex items-center gap-2"><div className="w-1.5 h-1.5 rounded-full bg-violet-500" /> Dynamic column-header prioritization</li>
-              <li className="flex items-center gap-2"><div className="w-1.5 h-1.5 rounded-full bg-violet-500" /> Blank trimmer & duplicate filter</li>
-            </ul>
           </div>
         </div>
       </section>
 
-      {/* Detailed Technical Capabilities (The Core Engines) */}
-      <section id="features" className="py-20 px-6 max-w-7xl mx-auto border-t border-slate-900 relative">
+      {/* Problems We Solve Section */}
+      <section id="problems" className="py-20 px-6 max-w-7xl mx-auto border-t border-slate-900 relative">
+        <div className="absolute top-1/3 right-1/4 w-[400px] h-[400px] bg-indigo-600/5 rounded-full blur-[120px] pointer-events-none" />
+        
+        <div className="text-center mb-16">
+          <span className="text-xs text-violet-400 uppercase tracking-widest font-extrabold bg-violet-500/10 px-3 py-1 rounded-full border border-violet-500/20">{t.problems.tag}</span>
+          <h2 className="text-3xl sm:text-5xl font-black text-white mt-4 tracking-tight leading-tight">
+            {t.problems.title}
+          </h2>
+          <p className="text-slate-400 text-sm sm:text-base max-w-2xl mx-auto mt-3">
+            {t.problems.subtitle}
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div className="bg-slate-900/30 border border-slate-800 p-8 rounded-2xl hover:border-violet-500/30 transition-all group relative">
+            <div className="bg-violet-500/10 text-violet-400 p-3.5 rounded-xl w-fit mb-6 border border-violet-500/20">
+              <ShieldAlert className="h-6 w-6" />
+            </div>
+            <h3 className="text-xl font-bold text-slate-100 mb-3 group-hover:text-violet-400 transition-colors">{t.problems.missing.title}</h3>
+            <p className="text-slate-400 text-sm leading-relaxed">
+              {t.problems.missing.description}
+            </p>
+          </div>
+
+          <div className="bg-slate-900/30 border border-slate-800 p-8 rounded-2xl hover:border-violet-500/30 transition-all group relative">
+            <div className="bg-violet-500/10 text-violet-400 p-3.5 rounded-xl w-fit mb-6 border border-violet-500/20">
+              <AlertCircle className="h-6 w-6" />
+            </div>
+            <h3 className="text-xl font-bold text-slate-100 mb-3 group-hover:text-violet-400 transition-colors">{t.problems.unexpected.title}</h3>
+            <p className="text-slate-400 text-sm leading-relaxed">
+              {t.problems.unexpected.description}
+            </p>
+          </div>
+
+          <div className="bg-slate-900/30 border border-slate-800 p-8 rounded-2xl hover:border-violet-500/30 transition-all group relative">
+            <div className="bg-violet-500/10 text-violet-400 p-3.5 rounded-xl w-fit mb-6 border border-violet-500/20">
+              <RotateCw className="h-6 w-6" />
+            </div>
+            <h3 className="text-xl font-bold text-slate-100 mb-3 group-hover:text-violet-400 transition-colors">{t.problems.migration.title}</h3>
+            <p className="text-slate-400 text-sm leading-relaxed">
+              {t.problems.migration.description}
+            </p>
+          </div>
+
+          <div className="bg-slate-900/30 border border-slate-800 p-8 rounded-2xl hover:border-violet-500/30 transition-all group relative">
+            <div className="bg-violet-500/10 text-violet-400 p-3.5 rounded-xl w-fit mb-6 border border-violet-500/20">
+              <FileSpreadsheet className="h-6 w-6" />
+            </div>
+            <h3 className="text-xl font-bold text-slate-100 mb-3 group-hover:text-violet-400 transition-colors">{t.problems.inventory.title}</h3>
+            <p className="text-slate-400 text-sm leading-relaxed">
+              {t.problems.inventory.description}
+            </p>
+          </div>
+
+          <div className="bg-slate-900/30 border border-slate-800 p-8 rounded-2xl hover:border-violet-500/30 transition-all group relative">
+            <div className="bg-violet-500/10 text-violet-400 p-3.5 rounded-xl w-fit mb-6 border border-violet-500/20">
+              <CheckCircle2 className="h-6 w-6" />
+            </div>
+            <h3 className="text-xl font-bold text-slate-100 mb-3 group-hover:text-violet-400 transition-colors">{t.problems.compliance.title}</h3>
+            <p className="text-slate-400 text-sm leading-relaxed">
+              {t.problems.compliance.description}
+            </p>
+          </div>
+
+          <div className="bg-slate-900/30 border border-slate-800 p-8 rounded-2xl hover:border-violet-500/30 transition-all group relative">
+            <div className="bg-violet-500/10 text-violet-400 p-3.5 rounded-xl w-fit mb-6 border border-violet-500/20">
+              <Database className="h-6 w-6" />
+            </div>
+            <h3 className="text-xl font-bold text-slate-100 mb-3 group-hover:text-violet-400 transition-colors">{t.problems.integrity.title}</h3>
+            <p className="text-slate-400 text-sm leading-relaxed">
+              {t.problems.integrity.description}
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {/* How It Works Section */}
+      <section id="how-it-works" className="py-20 px-6 max-w-7xl mx-auto border-t border-slate-900">
+        <div className="text-center mb-16">
+          <span className="text-xs text-violet-400 uppercase tracking-widest font-extrabold bg-violet-500/10 px-3 py-1 rounded-full border border-violet-500/20">{t.howItWorks.tag}</span>
+          <h2 className="text-3xl sm:text-5xl font-black text-white mt-4 tracking-tight leading-tight">
+            {t.howItWorks.title}
+          </h2>
+          <p className="text-slate-400 text-sm sm:text-base max-w-2xl mx-auto mt-3">
+            {t.howItWorks.subtitle}
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 relative">
+          {/* Step 1 */}
+          <div className="bg-slate-900/20 border border-slate-800/80 p-6 rounded-2xl relative">
+            <div className="text-xs text-violet-400 font-mono uppercase mb-4 tracking-wider">Step 1</div>
+            <h3 className="text-lg font-bold text-white mb-2">{t.howItWorks.step1.title}</h3>
+            <p className="text-slate-400 text-xs sm:text-sm leading-relaxed">{t.howItWorks.step1.description}</p>
+          </div>
+
+          {/* Step 2 */}
+          <div className="bg-slate-900/20 border border-slate-800/80 p-6 rounded-2xl relative">
+            <div className="text-xs text-violet-400 font-mono uppercase mb-4 tracking-wider">Step 2</div>
+            <h3 className="text-lg font-bold text-white mb-2">{t.howItWorks.step2.title}</h3>
+            <p className="text-slate-400 text-xs sm:text-sm leading-relaxed">{t.howItWorks.step2.description}</p>
+          </div>
+
+          {/* Step 3 */}
+          <div className="bg-slate-900/20 border border-slate-800/80 p-6 rounded-2xl relative">
+            <div className="text-xs text-violet-400 font-mono uppercase mb-4 tracking-wider">Step 3</div>
+            <h3 className="text-lg font-bold text-white mb-2">{t.howItWorks.step3.title}</h3>
+            <p className="text-slate-400 text-xs sm:text-sm leading-relaxed">{t.howItWorks.step3.description}</p>
+          </div>
+
+          {/* Step 4 */}
+          <div className="bg-slate-900/20 border border-slate-800/80 p-6 rounded-2xl relative">
+            <div className="text-xs text-violet-400 font-mono uppercase mb-4 tracking-wider">Step 4</div>
+            <h3 className="text-lg font-bold text-white mb-2">{t.howItWorks.step4.title}</h3>
+            <p className="text-slate-400 text-xs sm:text-sm leading-relaxed">{t.howItWorks.step4.description}</p>
+          </div>
+        </div>
+      </section>
+
+      {/* Benefits Over Features Section */}
+      <section id="benefits" className="py-20 px-6 max-w-7xl mx-auto border-t border-slate-900 relative">
         <div className="absolute top-1/2 left-0 w-[400px] h-[400px] bg-indigo-600/5 rounded-full blur-[100px] pointer-events-none" />
         
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-16 items-center">
           <div className="lg:col-span-5">
-            <h2 className="text-xs text-violet-400 uppercase tracking-widest font-extrabold mb-3">Enterprise Grade Infrastructure</h2>
-            <h3 className="text-3xl sm:text-5xl font-black text-white tracking-tight leading-tight mb-6">
-              Processing power engineered for raw data integrity
+            <span className="text-xs text-violet-400 uppercase tracking-widest font-extrabold bg-violet-500/10 px-3 py-1 rounded-full border border-violet-500/20">{t.benefits.tag}</span>
+            <h3 className="text-3xl sm:text-5xl font-black text-white mt-4 tracking-tight leading-tight mb-6">
+              {t.benefits.title}
             </h3>
-            <p className="text-slate-400 text-sm sm:text-base leading-relaxed mb-8">
-              Generic data tools lock, freeze, or choke when handling massive directories. FileMaster leverages Python sets and dynamic background-threaded workers, keeping the UI at 100% responsiveness while completing calculations in fractions of a second.
+            <p className="text-slate-400 text-sm sm:text-base leading-relaxed">
+              {t.benefits.subtitle}
             </p>
-
-            <div className="space-y-4">
-              <div className="flex gap-4">
-                <div className="bg-slate-900 border border-slate-800 text-violet-400 p-2.5 rounded-xl h-fit">
-                  <Cpu className="h-5 w-5" />
-                </div>
-                <div>
-                  <h4 className="font-bold text-slate-200">Set-Algebra Math</h4>
-                  <p className="text-slate-400 text-xs mt-1">Utilizes Python set intersections and differences instead of linear array search, cutting processing time from $O(N^2)$ to $O(N)$.</p>
-                </div>
-              </div>
-
-              <div className="flex gap-4">
-                <div className="bg-slate-900 border border-slate-800 text-violet-400 p-2.5 rounded-xl h-fit">
-                  <RefreshCw className="h-5 w-5" />
-                </div>
-                <div>
-                  <h4 className="font-bold text-slate-200">Asynchronous Thread Worker</h4>
-                  <p className="text-slate-400 text-xs mt-1">Spawns lightweight background operations for loader parsing and index writing, rendering uninterrupted UI frames.</p>
-                </div>
-              </div>
-
-              <div className="flex gap-4">
-                <div className="bg-slate-900 border border-slate-800 text-violet-400 p-2.5 rounded-xl h-fit">
-                  <Database className="h-5 w-5" />
-                </div>
-                <div>
-                  <h4 className="font-bold text-slate-200">Dynamic Multi-format Connectors</h4>
-                  <p className="text-slate-400 text-xs mt-1">Full-spectrum ingestion of CSV, JSON, XLSX, XLS with automatic sniffers for semicolon, comma, and tabular partitions.</p>
-                </div>
-              </div>
-            </div>
           </div>
 
-          <div className="lg:col-span-7 bg-slate-900/40 border border-slate-800 rounded-2xl p-6 lg:p-8 relative">
-            <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/5 to-transparent rounded-2xl pointer-events-none" />
-            <h4 className="text-xs text-violet-400 font-bold uppercase tracking-wider mb-6 flex items-center gap-2">
-              <Code className="h-4 w-4" /> Code Architecture Snippet: FileMaster comparison pipeline
-            </h4>
-            
-            <div className="bg-slate-950 rounded-xl p-4 border border-slate-800 overflow-x-auto font-mono text-[11px] leading-relaxed text-slate-300">
-              <div className="text-slate-500">// Optimized Python Loader & Set Reconciliation</div>
-              <div><span className="text-violet-400">def</span> <span className="text-indigo-400">compare_sets</span>(expected_ids, disk_ids):</div>
-              <div className="pl-4">expected = <span className="text-emerald-400">set</span>(expected_ids)</div>
-              <div className="pl-4">actual = <span className="text-emerald-400">set</span>(disk_ids)</div>
-              <div className="pl-4 text-slate-500"># O(1) Lookup complexity operations:</div>
-              <div className="pl-4">found = expected & actual</div>
-              <div className="pl-4">missing = expected - actual</div>
-              <div className="pl-4">extra = actual - expected</div>
-              <div className="pl-4"><span className="text-violet-400">return</span> {'{'}</div>
-              <div className="pl-8"><span className="text-amber-400">"found"</span>: list(found),</div>
-              <div className="pl-8"><span className="text-amber-400">"missing"</span>: list(missing),</div>
-              <div className="pl-8"><span className="text-amber-400">"extra"</span>: list(extra),</div>
-              <div className="pl-8"><span className="text-amber-400">"completion"</span>: len(found) / len(expected) <span className="text-violet-400">if</span> expected <span className="text-violet-400">else</span> <span className="text-indigo-400">1.0</span></div>
-              <div className="pl-4">{'}'}</div>
-              <div className="mt-4 text-slate-500">// Regex prefix-processor extraction logic</div>
-              <div><span className="text-violet-400">def</span> <span className="text-indigo-400">extract_identifier</span>(filename, ignore_ext=<span className="text-indigo-400">True</span>):</div>
-              <div className="pl-4">stem = Path(filename).stem <span className="text-violet-400">if</span> ignore_ext <span className="text-violet-400">else</span> filename</div>
-              <div className="pl-4">normalized = stem.strip().lower()</div>
-              <div className="pl-4">match = re.match(<span className="text-emerald-400">r"^([a-zA-Z0-9]+)[-_]"</span>, normalized)</div>
-              <div className="pl-4"><span className="text-violet-400">return</span> match.group(<span className="text-indigo-400">1</span>) <span className="text-violet-400">if</span> match <span className="text-violet-400">else</span> normalized</div>
-            </div>
-
-            <div className="grid grid-cols-2 gap-4 mt-6">
-              <div className="bg-slate-950 p-4 rounded-xl border border-slate-800">
-                <span className="text-white font-bold text-sm block mb-1">Pre-processing pipeline</span>
-                <span className="text-slate-400 text-xs">Cleans up prefixes like AB123CD_photo.jpg to match against master raw records automatically.</span>
-              </div>
-              <div className="bg-slate-950 p-4 rounded-xl border border-slate-800">
-                <span className="text-white font-bold text-sm block mb-1">Grid alignment safety</span>
-                <span className="text-slate-400 text-xs">Applies exact width padding based on maximum string lengths when writing final audit reports.</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Licensing Lifecycle Model */}
-      <section id="licensing" className="py-20 px-6 max-w-7xl mx-auto border-t border-slate-900">
-        <div className="text-center mb-16">
-          <h2 className="text-xs text-violet-400 uppercase tracking-widest font-extrabold mb-3">Lifetime Licensing Protocol</h2>
-          <h3 className="text-3xl sm:text-5xl font-black text-white max-w-3xl mx-auto tracking-tight leading-tight">
-            Lifetime Single-Machine Hardware Locking
-          </h3>
-          <p className="text-slate-400 text-base max-w-2xl mx-auto mt-4">
-            Pay once, use forever. Secure offline-first activation model with RS256 cryptographic verification.
-          </p>
-        </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
-          <div className="bg-slate-900/30 border border-slate-800 p-6 rounded-2xl flex flex-col justify-between">
-            <div>
-              <div className="text-violet-400 bg-violet-500/10 p-3 rounded-xl w-fit mb-4 border border-violet-500/20">
+          <div className="lg:col-span-7 space-y-6">
+            <div className="bg-slate-900/40 border border-slate-800 p-6 rounded-2xl flex gap-4 items-start">
+              <div className="bg-violet-500/10 text-violet-400 p-2.5 rounded-xl h-fit border border-violet-500/20">
                 <Zap className="h-5 w-5" />
               </div>
-              <h4 className="text-lg font-bold text-slate-100 mb-2">1. Hardware Fingerprint</h4>
-              <p className="text-slate-400 text-xs leading-relaxed">
-                App gathers BIOS UUID, processor attributes, system nodes, and architecture metadata, generating a stable 64-character SHA-256 hash completely locked to the physical processor.
-              </p>
-            </div>
-            <span className="text-slate-600 text-xs font-mono mt-4">Client Offline Node</span>
-          </div>
-
-          <div className="bg-slate-900/30 border border-slate-800 p-6 rounded-2xl flex flex-col justify-between">
-            <div>
-              <div className="text-violet-400 bg-violet-500/10 p-3 rounded-xl w-fit mb-4 border border-violet-500/20">
-                <Fingerprint className="h-5 w-5" />
+              <div>
+                <h4 className="font-bold text-slate-100 text-lg">{t.benefits.benefit1.title}</h4>
+                <p className="text-slate-400 text-sm mt-1">{t.benefits.benefit1.description}</p>
               </div>
-              <h4 className="text-lg font-bold text-slate-100 mb-2">2. Secure Verification</h4>
-              <p className="text-slate-400 text-xs leading-relaxed">
-                Verifies keys directly with standard REST headers inside Vercel. Stores hardware parameters and changes status from <span className="text-violet-400">unused</span> to <span className="text-emerald-400">activated</span>, recording dynamic activation timestamps.
-              </p>
             </div>
-            <span className="text-slate-600 text-xs font-mono mt-4">Next.js API Server</span>
-          </div>
 
-          <div className="bg-slate-900/30 border border-slate-800 p-6 rounded-2xl flex flex-col justify-between">
-            <div>
-              <div className="text-violet-400 bg-violet-500/10 p-3 rounded-xl w-fit mb-4 border border-violet-500/20">
-                <ShieldCheck className="h-5 w-5" />
-              </div>
-              <h4 className="text-lg font-bold text-slate-100 mb-2">3. Signed JWT Lease</h4>
-              <p className="text-slate-400 text-xs leading-relaxed">
-                The license server signs the lease using an asymmetrically encrypted RS256 Private key. The lease carries keys, fingerprints, issued and expiry claims, stored locally inside <span className="text-violet-400">~/.filemaster_lease</span>.
-              </p>
-            </div>
-            <span className="text-slate-600 text-xs font-mono mt-4">Vercel Environment Payload</span>
-          </div>
-
-          <div className="bg-slate-900/30 border border-slate-800 p-6 rounded-2xl flex flex-col justify-between">
-            <div>
-              <div className="text-violet-400 bg-violet-500/10 p-3 rounded-xl w-fit mb-4 border border-violet-500/20">
-                <RotateCw className="h-5 w-5" />
-              </div>
-              <h4 className="text-lg font-bold text-slate-100 mb-2">4. Daily Offline Check</h4>
-              <p className="text-slate-400 text-xs leading-relaxed">
-                On launch, the client reads the lease and decodes it using the RSA Public Key. It validates signature integrity, expiration, and ensures current device fingerprint matches the JWT claim. No internet required.
-              </p>
-            </div>
-            <span className="text-slate-600 text-xs font-mono mt-4">PyArmor Obfuscated Verification</span>
-          </div>
-        </div>
-
-        {/* Dynamic Verification Flow Mockup */}
-        <div className="mt-12 bg-slate-900/20 border border-slate-800 rounded-2xl p-6 flex flex-col items-center">
-          <span className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">Verification Flow Spec</span>
-          <div className="w-full flex flex-col md:flex-row items-center justify-around gap-6 text-xs text-center text-slate-400 font-mono">
-            <div className="bg-slate-950 px-4 py-2 rounded-xl border border-slate-800 w-52">
-              <div className="text-white font-bold mb-1">1. User license input</div>
-              <span>FM-1A8D-9E2F-43B0</span>
-            </div>
-            <div className="text-violet-500 font-extrabold text-base">→</div>
-            <div className="bg-slate-950 px-4 py-2 rounded-xl border border-slate-800 w-52">
-              <div className="text-white font-bold mb-1">2. POST /api/verify</div>
-              <span>Sends Fingerprint</span>
-            </div>
-            <div className="text-violet-500 font-extrabold text-base">→</div>
-            <div className="bg-slate-950 px-4 py-2 rounded-xl border border-slate-800 w-52">
-              <div className="text-white font-bold mb-1">3. RS256 JWT Signed</div>
-              <span>Saved as Local Lease</span>
-            </div>
-            <div className="text-violet-500 font-extrabold text-base">→</div>
-            <div className="bg-slate-950 px-4 py-2 rounded-xl border border-slate-800 w-52">
-              <div className="text-white font-bold mb-1">4. Secure Boot</div>
-              <span>100% Offline Validation</span>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Visual Identity & UX */}
-      <section className="py-20 px-6 max-w-7xl mx-auto border-t border-slate-900 bg-gradient-to-b from-transparent to-violet-950/10">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-16 items-center">
-          <div className="lg:col-span-6 bg-slate-900/40 border border-slate-800 rounded-2xl p-6 space-y-6">
-            <div className="flex gap-4 items-start">
-              <div className="bg-violet-500/10 border border-violet-500/20 text-violet-400 p-2.5 rounded-xl">
+            <div className="bg-slate-900/40 border border-slate-800 p-6 rounded-2xl flex gap-4 items-start">
+              <div className="bg-violet-500/10 text-violet-400 p-2.5 rounded-xl h-fit border border-violet-500/20">
                 <HardDrive className="h-5 w-5" />
               </div>
               <div>
-                <h4 className="font-bold text-slate-200">Fluid Dual Color Themes</h4>
-                <p className="text-slate-400 text-xs mt-1">Light Mode featuring violet accents (#5E35B1) with crisp charcoal surfaces, and Dark Mode featuring an active soft background (#121212) with elevated grey outlines. Changes render dynamically in-place.</p>
+                <h4 className="font-bold text-slate-100 text-lg">{t.benefits.benefit2.title}</h4>
+                <p className="text-slate-400 text-sm mt-1">{t.benefits.benefit2.description}</p>
               </div>
             </div>
 
-            <div className="flex gap-4 items-start">
-              <div className="bg-violet-500/10 border border-violet-500/20 text-violet-400 p-2.5 rounded-xl">
-                <XCircle className="h-5 w-5" />
+            <div className="bg-slate-900/40 border border-slate-800 p-6 rounded-2xl flex gap-4 items-start">
+              <div className="bg-violet-500/10 text-violet-400 p-2.5 rounded-xl h-fit border border-violet-500/20">
+                <Search className="h-5 w-5" />
               </div>
               <div>
-                <h4 className="font-bold text-slate-200">Dnd Helper & Path Sanitization</h4>
-                <p className="text-slate-400 text-xs mt-1">Full integration of tkinterdnd2 drag-and-drop system. Cleans brackets, handles whitespace escapes, and converts path parameters smoothly for instant directory load inputs.</p>
-              </div>
-            </div>
-
-            <div className="flex gap-4 items-start">
-              <div className="bg-violet-500/10 border border-violet-500/20 text-violet-400 p-2.5 rounded-xl">
-                <RotateCw className="h-5 w-5" />
-              </div>
-              <div>
-                <h4 className="font-bold text-slate-200">Centralized Rotating Logs</h4>
-                <p className="text-slate-400 text-xs mt-1">Keeps remote debugging clean with built-in logs rotation. Caps the filemaster.log file size at exactly 5MB, maintaining up to 3 backward versions cleanly.</p>
+                <h4 className="font-bold text-slate-100 text-lg">{t.benefits.benefit3.title}</h4>
+                <p className="text-slate-400 text-sm mt-1">{t.benefits.benefit3.description}</p>
               </div>
             </div>
           </div>
+        </div>
+      </section>
 
-          <div className="lg:col-span-6">
-            <h2 className="text-xs text-violet-400 uppercase tracking-widest font-extrabold mb-3">Refined Visual Identity</h2>
-            <h3 className="text-3xl sm:text-5xl font-black text-white tracking-tight leading-tight mb-6">
-              Modern native styling with real-time feedback
-            </h3>
-            <p className="text-slate-400 text-sm sm:text-base leading-relaxed mb-8">
-              The client interfaces have been custom-engineered to look like a modern native OS environment, featuring deep-colored spreadsheets outputs conforming strictly to standard templates. The output charts are drawn directly onto Canvas elements keeping the binaries lightweight and fast.
-            </p>
-            <div className="flex items-center gap-6">
-              <div className="text-center bg-slate-900 border border-slate-800 px-6 py-4 rounded-xl flex-1">
-                <span className="block text-2xl font-black text-emerald-400">Green</span>
-                <span className="text-[10px] uppercase font-bold tracking-wider text-slate-400">Found Sheet (#2E7D32)</span>
+      {/* Licensing Section (Reduced Prominence, Moved Near Bottom) */}
+      <section id="licensing" className="py-20 px-6 max-w-7xl mx-auto border-t border-slate-900">
+        <div className="text-center mb-16">
+          <span className="text-xs text-violet-400 uppercase tracking-widest font-extrabold bg-violet-500/10 px-3 py-1 rounded-full border border-violet-500/20">{t.licensing.tag}</span>
+          <h3 className="text-3xl sm:text-5xl font-black text-white mt-4 tracking-tight leading-tight">
+            {t.licensing.title}
+          </h3>
+          <p className="text-slate-400 text-base max-w-2xl mx-auto mt-3">
+            {t.licensing.description}
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <div className="bg-slate-900/30 border border-slate-800 p-8 rounded-2xl flex flex-col justify-between">
+            <div>
+              <div className="text-violet-400 bg-violet-500/10 p-3 rounded-xl w-fit mb-6 border border-violet-500/20">
+                <Check className="h-5 w-5" />
               </div>
-              <div className="text-center bg-slate-900 border border-slate-800 px-6 py-4 rounded-xl flex-1">
-                <span className="block text-2xl font-black text-rose-500">Red</span>
-                <span className="text-[10px] uppercase font-bold tracking-wider text-slate-400">Missing Sheet (#C62828)</span>
+              <h4 className="text-lg font-bold text-slate-100 mb-3">{t.licensing.oneTime.title}</h4>
+              <p className="text-slate-400 text-sm leading-relaxed">
+                {t.licensing.oneTime.description}
+              </p>
+            </div>
+          </div>
+
+          <div className="bg-slate-900/30 border border-slate-800 p-8 rounded-2xl flex flex-col justify-between">
+            <div>
+              <div className="text-violet-400 bg-violet-500/10 p-3 rounded-xl w-fit mb-6 border border-violet-500/20">
+                <Fingerprint className="h-5 w-5" />
               </div>
-              <div className="text-center bg-slate-900 border border-slate-800 px-6 py-4 rounded-xl flex-1">
-                <span className="block text-2xl font-black text-amber-500">Orange</span>
-                <span className="text-[10px] uppercase font-bold tracking-wider text-slate-400">Extra Sheet (#E65100)</span>
+              <h4 className="text-lg font-bold text-slate-100 mb-3">{t.licensing.offline.title}</h4>
+              <p className="text-slate-400 text-sm leading-relaxed">
+                {t.licensing.offline.description}
+              </p>
+            </div>
+          </div>
+
+          <div className="bg-slate-900/30 border border-slate-800 p-8 rounded-2xl flex flex-col justify-between">
+            <div>
+              <div className="text-violet-400 bg-violet-500/10 p-3 rounded-xl w-fit mb-6 border border-violet-500/20">
+                <RotateCw className="h-5 w-5" />
               </div>
+              <h4 className="text-lg font-bold text-slate-100 mb-3">{t.licensing.migration.title}</h4>
+              <p className="text-slate-400 text-sm leading-relaxed">
+                {t.licensing.migration.description}
+              </p>
             </div>
           </div>
         </div>
@@ -481,46 +496,49 @@ export default function LandingPage() {
       {/* Frequently Asked Questions */}
       <section id="faq" className="py-20 px-6 max-w-5xl mx-auto border-t border-slate-900">
         <div className="text-center mb-16">
-          <h2 className="text-xs text-violet-400 uppercase tracking-widest font-extrabold mb-3">Frequently Asked Questions</h2>
-          <h3 className="text-3xl sm:text-5xl font-black text-white tracking-tight leading-tight">
-            Everything you need to know
+          <span className="text-xs text-violet-400 uppercase tracking-widest font-extrabold bg-violet-500/10 px-3 py-1 rounded-full border border-violet-500/20">{t.faq.tag}</span>
+          <h3 className="text-3xl sm:text-5xl font-black text-white mt-4 tracking-tight leading-tight">
+            {t.faq.title}
           </h3>
+          <p className="text-slate-400 text-sm sm:text-base max-w-2xl mx-auto mt-3">
+            {t.faq.subtitle}
+          </p>
         </div>
 
         <div className="space-y-6">
           <div className="bg-slate-900/40 border border-slate-800 p-6 rounded-2xl">
             <h4 className="text-base font-bold text-slate-100 mb-2 flex items-center gap-2">
-              <HelpCircle className="h-4 w-4 text-violet-400" /> How does the offline licensing lease work?
+              <HelpCircle className="h-4 w-4 text-violet-400" /> {t.faq.q1.q}
             </h4>
             <p className="text-slate-400 text-sm leading-relaxed">
-              When you activate FileMaster using your license key online, our Next.js API server signs a JWT containing your hardware fingerprint using an RSA 2048-bit Private Key. This JWT is stored inside your user profile (~/.filemaster_lease). On boot, the client reads this file and verifies the signature using the built-in RSA Public Key fully offline. It then computes your local fingerprint and matches them.
+              {t.faq.q1.a}
             </p>
           </div>
 
           <div className="bg-slate-900/40 border border-slate-800 p-6 rounded-2xl">
             <h4 className="text-base font-bold text-slate-100 mb-2 flex items-center gap-2">
-              <HelpCircle className="h-4 w-4 text-violet-400" /> What happens if my computer hardware breaks or I need to migrate?
+              <HelpCircle className="h-4 w-4 text-violet-400" /> {t.faq.q2.q}
             </h4>
             <p className="text-slate-400 text-sm leading-relaxed">
-              Since the license is tied securely to your hardware signature, a major motherboard or BIOS change will trigger a mismatch. If you need to migrate, our customer service administrators can easily target your license key in the Next.js Admin portal and hit &quot;Reset License&quot;. This clears the registered fingerprint and lets the key bind to your new machine on its next online launch.
+              {t.faq.q2.a}
             </p>
           </div>
 
           <div className="bg-slate-900/40 border border-slate-800 p-6 rounded-2xl">
             <h4 className="text-base font-bold text-slate-100 mb-2 flex items-center gap-2">
-              <HelpCircle className="h-4 w-4 text-violet-400" /> Can it handle folders over network volumes or infinite paths?
+              <HelpCircle className="h-4 w-4 text-violet-400" /> {t.faq.q3.q}
             </h4>
             <p className="text-slate-400 text-sm leading-relaxed">
-              Yes, FileMaster uses standard Python pathlib constructs which resolve local drives, network mapped shares, and infinite directory depths. The recursive engine iterates through leaf items, skipping empty container nodes and extracting only file structures.
+              {t.faq.q3.a}
             </p>
           </div>
 
           <div className="bg-slate-900/40 border border-slate-800 p-6 rounded-2xl">
             <h4 className="text-base font-bold text-slate-100 mb-2 flex items-center gap-2">
-              <HelpCircle className="h-4 w-4 text-violet-400" /> Are my files uploaded to any servers?
+              <HelpCircle className="h-4 w-4 text-violet-400" /> {t.faq.q4.q}
             </h4>
             <p className="text-slate-400 text-sm leading-relaxed">
-              Never. FileMaster is a local-first desktop application. No file data, column structures, filenames, or spreadsheets are ever uploaded or transmitted. The only online interaction is a short verification handshake containing your license key and your cryptographically computed hardware fingerprint hash.
+              {t.faq.q4.a}
             </p>
           </div>
         </div>
@@ -532,31 +550,31 @@ export default function LandingPage() {
         
         <div className="relative z-10 max-w-3xl mx-auto space-y-8 bg-slate-900/40 border border-slate-800 rounded-3xl p-8 sm:p-12 shadow-2xl">
           <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-950 border border-violet-500/20 text-xs font-semibold text-violet-400">
-            <Sparkles className="h-3 w-3" /> Seamless Data Auditing Awaits
+            <Sparkles className="h-3 w-3" /> {t.download.tagline}
           </div>
           
           <h2 className="text-3xl sm:text-5xl font-black text-white tracking-tight leading-none">
-            Ready to secure your data reconciliation?
+            {t.download.title}
           </h2>
           
           <p className="text-slate-400 text-sm sm:text-base leading-relaxed">
-            Download FileMaster for Windows, macOS, or Linux today. Activate instantly with your purchased lifetime key and experience O(1) set-algebra comparison performance.
+            {t.download.description}
           </p>
 
           <div className="flex flex-col sm:flex-row justify-center items-center gap-4">
-            <button className="w-full sm:w-auto inline-flex items-center justify-center gap-2 text-sm font-bold bg-gradient-to-r from-violet-600 to-indigo-600 text-white px-8 py-4 rounded-xl shadow-lg shadow-violet-500/20 hover:shadow-violet-500/40 transition-all">
-              Download FileMaster Desktop App
-            </button>
+            <a className="w-full sm:w-auto inline-flex items-center justify-center gap-2 text-sm font-bold bg-gradient-to-r from-violet-600 to-indigo-600 text-white px-8 py-4 rounded-xl shadow-lg shadow-violet-500/20 hover:shadow-violet-500/40 transition-all" href='https://drive.google.com/uc?export=download&id=1LWK6aABBf2_ppm31viee4q8AonN6pIxg' target='_blank' rel="noopener noreferrer">
+              {t.download.button}
+            </a>
             <Link 
               href="/auth/login" 
               className="w-full sm:w-auto inline-flex items-center justify-center gap-2 text-sm font-bold bg-slate-950 border border-slate-800 text-slate-300 hover:text-white px-8 py-4 rounded-xl hover:bg-slate-900 transition-all"
             >
-              Access Admin Console
+              {t.download.adminConsole}
             </Link>
           </div>
 
           <p className="text-[11px] text-slate-500">
-            For hardware migration or support inquiries, contact licensing-support@filemaster.enterprise.
+            {t.download.support}
           </p>
         </div>
       </section>
@@ -572,17 +590,16 @@ export default function LandingPage() {
           </div>
 
           <p className="text-xs text-slate-500">
-            &copy; {new Date().getFullYear()} FileMaster. All rights reserved. Built for secure enterprise file reconciliation.
+            &copy; {new Date().getFullYear()} FileMaster. {t.footer.copyright}
           </p>
 
           <div className="flex gap-6 text-xs text-slate-500 font-medium">
-            <a href="#" className="hover:text-slate-300 transition-colors">Privacy Policy</a>
-            <a href="#" className="hover:text-slate-300 transition-colors">Terms of Service</a>
-            <a href="#" className="hover:text-slate-300 transition-colors">Documentation</a>
+            <a href="#" className="hover:text-slate-300 transition-colors">{t.footer.privacyPolicy}</a>
+            <a href="#" className="hover:text-slate-300 transition-colors">{t.footer.termsOfService}</a>
+            <a href="#" className="hover:text-slate-300 transition-colors">{t.footer.documentation}</a>
           </div>
         </div>
       </footer>
-
     </div>
   );
 }

@@ -20,7 +20,12 @@ import {
   HelpCircle,
   Hash,
   ShieldCheck,
-  ShieldAlert
+  ShieldAlert,
+  ArrowUpCircle,
+  ToggleLeft,
+  ToggleRight,
+  Globe,
+  FileCode
 } from 'lucide-react';
 import { 
   generateLicensesAction, 
@@ -28,7 +33,10 @@ import {
   revokeLicenseAction, 
   restoreLicenseAction, 
   deleteLicenseAction, 
-  logoutAction 
+  logoutAction,
+  createReleaseAction,
+  toggleReleaseActiveAction,
+  deleteReleaseAction
 } from '@/lib/actions';
 
 interface License {
@@ -40,18 +48,35 @@ interface License {
   last_validated_at: string | null;
 }
 
+interface Release {
+  id: string;
+  version: string;
+  download_url: string;
+  sha256: string;
+  is_active: boolean;
+  created_at: string | null;
+}
+
 interface AdminDashboardClientProps {
   initialLicenses: License[];
+  initialReleases: Release[];
   userEmail: string;
 }
 
-export default function AdminDashboardClient({ initialLicenses, userEmail }: AdminDashboardClientProps) {
+export default function AdminDashboardClient({ initialLicenses, initialReleases = [], userEmail }: AdminDashboardClientProps) {
   const [licenses, setLicenses] = useState<License[]>(initialLicenses);
+  const [releases, setReleases] = useState<Release[]>(initialReleases);
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState<'all' | 'unused' | 'activated' | 'revoked'>('all');
   const [generateCount, setGenerateCount] = useState(5);
-  const [feedback, setFeedback] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
   
+  // Release Form Fields
+  const [releaseVersion, setReleaseVersion] = useState('');
+  const [releaseUrl, setReleaseUrl] = useState('');
+  const [releaseHash, setReleaseHash] = useState('');
+  const [releaseActive, setReleaseActive] = useState(true);
+
+  const [feedback, setFeedback] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
   const [isPending, startTransition] = useTransition();
 
   // Filter licenses based on search and status
@@ -80,7 +105,6 @@ export default function AdminDashboardClient({ initialLicenses, userEmail }: Adm
       const result = await generateLicensesAction(generateCount);
       if (result.success) {
         showFeedback('success', `Successfully created ${result.count} premium lifetime keys.`);
-        // Reload page data silently or mock update
         window.location.reload();
       } else {
         showFeedback('error', result.error || 'Failed to generate keys.');
@@ -121,7 +145,6 @@ export default function AdminDashboardClient({ initialLicenses, userEmail }: Adm
       const result = await restoreLicenseAction(id);
       if (result.success) {
         showFeedback('success', `License key ${key} has been restored successfully.`);
-        // Reload to accurately determine activated or unused status
         window.location.reload();
       } else {
         showFeedback('error', result.error || 'Failed to restore license.');
@@ -139,6 +162,54 @@ export default function AdminDashboardClient({ initialLicenses, userEmail }: Adm
         setLicenses(prev => prev.filter(lic => lic.id !== id));
       } else {
         showFeedback('error', result.error || 'Failed to delete license.');
+      }
+    });
+  };
+
+  // Release Handlers
+  const handleCreateRelease = () => {
+    if (!releaseVersion || !releaseUrl || !releaseHash) {
+      showFeedback('error', 'Please fill out all release fields.');
+      return;
+    }
+
+    startTransition(async () => {
+      const result = await createReleaseAction(releaseVersion, releaseUrl, releaseHash, releaseActive);
+      if (result.success) {
+        showFeedback('success', `Successfully published OTA release version ${releaseVersion}`);
+        setReleaseVersion('');
+        setReleaseUrl('');
+        setReleaseHash('');
+        window.location.reload();
+      } else {
+        showFeedback('error', result.error || 'Failed to create release.');
+      }
+    });
+  };
+
+  const handleToggleReleaseActive = (id: string, currentStatus: boolean, version: string) => {
+    startTransition(async () => {
+      const result = await toggleReleaseActiveAction(id, currentStatus);
+      if (result.success) {
+        const nextStatus = !currentStatus;
+        showFeedback('success', `Release ${version} is now ${nextStatus ? 'ACTIVE (Clients will auto-update to this)' : 'INACTIVE'}`);
+        window.location.reload();
+      } else {
+        showFeedback('error', result.error || 'Failed to toggle active status.');
+      }
+    });
+  };
+
+  const handleDeleteRelease = (id: string, version: string) => {
+    if (!confirm(`Are you sure you want to permanently delete release ${version} from the updates list?`)) return;
+
+    startTransition(async () => {
+      const result = await deleteReleaseAction(id);
+      if (result.success) {
+        showFeedback('success', `Release ${version} deleted successfully.`);
+        setReleases(prev => prev.filter(r => r.id !== id));
+      } else {
+        showFeedback('error', result.error || 'Failed to delete release.');
       }
     });
   };
@@ -224,12 +295,185 @@ export default function AdminDashboardClient({ initialLicenses, userEmail }: Adm
           </div>
 
           <div className="bg-slate-900/40 border border-slate-800 p-6 rounded-2xl relative">
-            <div className="absolute top-6 right-6 text-rose-800"><XCircle className="h-6 w-6" /></div>
-            <span className="text-xs text-slate-400 font-bold uppercase tracking-wider block mb-1">Revoked Keys</span>
-            <span className="text-3xl font-black text-rose-500">{revokedCount}</span>
-            <p className="text-[10px] text-rose-500/80 mt-2 font-mono">Blocked from offline verification lease</p>
+            <div className="absolute top-6 right-6 text-rose-800"><ArrowUpCircle className="h-6 w-6" /></div>
+            <span className="text-xs text-slate-400 font-bold uppercase tracking-wider block mb-1">OTA App Release</span>
+            <span className="text-3xl font-black text-violet-400">
+              {releases.find(r => r.is_active)?.version || 'None'}
+            </span>
+            <p className="text-[10px] text-slate-500 mt-2 font-mono">Active version for desktop client updates</p>
           </div>
         </div>
+
+        {/* ==================== OTA UPDATES & APP RELEASES SECTION ==================== */}
+        <section className="border border-slate-800 rounded-3xl p-6 bg-slate-900/20 relative space-y-6">
+          <div className="flex items-center gap-3 border-b border-slate-800/80 pb-4">
+            <ArrowUpCircle className="h-6 w-6 text-violet-400 animate-pulse" />
+            <div>
+              <h2 className="font-extrabold text-base text-white tracking-tight">FileMaster OTA Deployment</h2>
+              <p className="text-slate-400 text-xs mt-0.5">Publish new binary patches and manage rolling updates dynamically.</p>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+            {/* Publish Release Form */}
+            <div className="lg:col-span-4 bg-slate-900/60 border border-slate-800 p-5 rounded-2xl space-y-4">
+              <h3 className="font-extrabold text-xs uppercase tracking-wider text-slate-300 flex items-center gap-1.5">
+                <Plus className="h-3.5 w-3.5 text-violet-400" /> Publish New Version
+              </h3>
+
+              <div className="space-y-3 text-xs">
+                <div>
+                  <label className="block text-slate-400 font-bold uppercase tracking-wider mb-1">Version Number</label>
+                  <input 
+                    type="text" 
+                    placeholder="e.g. 1.3.1"
+                    value={releaseVersion}
+                    onChange={(e) => setReleaseVersion(e.target.value)}
+                    className="w-full rounded-xl bg-slate-950 border border-slate-800 p-3 text-slate-100 placeholder:text-slate-600 focus:border-violet-500 focus:ring-1 focus:ring-violet-500 outline-none font-mono"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-slate-400 font-bold uppercase tracking-wider mb-1">Zip Download URL</label>
+                  <div className="relative">
+                    <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-600"><Globe className="h-3.5 w-3.5" /></span>
+                    <input 
+                      type="url" 
+                      placeholder="https://cdn.example.com/patch.zip"
+                      value={releaseUrl}
+                      onChange={(e) => setReleaseUrl(e.target.value)}
+                      className="w-full rounded-xl bg-slate-950 border border-slate-800 py-3 pl-9 pr-3 text-slate-100 placeholder:text-slate-600 focus:border-violet-500 focus:ring-1 focus:ring-violet-500 outline-none"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-slate-400 font-bold uppercase tracking-wider mb-1">Zip SHA-256 Checksum</label>
+                  <div className="relative">
+                    <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-600"><FileCode className="h-3.5 w-3.5" /></span>
+                    <input 
+                      type="text" 
+                      placeholder="64-character hex hash"
+                      value={releaseHash}
+                      onChange={(e) => setReleaseHash(e.target.value)}
+                      className="w-full rounded-xl bg-slate-950 border border-slate-800 py-3 pl-9 pr-3 text-slate-100 placeholder:text-slate-600 focus:border-violet-500 focus:ring-1 focus:ring-violet-500 outline-none font-mono"
+                    />
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2 pt-2">
+                  <input 
+                    type="checkbox" 
+                    id="makeActive" 
+                    checked={releaseActive} 
+                    onChange={(e) => setReleaseActive(e.target.checked)}
+                    className="rounded bg-slate-950 border border-slate-800 text-violet-500 focus:ring-violet-500 w-4 h-4" 
+                  />
+                  <label htmlFor="makeActive" className="text-slate-300 font-semibold cursor-pointer">Activate immediately for all clients</label>
+                </div>
+
+                <button
+                  onClick={handleCreateRelease}
+                  disabled={isPending}
+                  className="w-full bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 text-white font-bold py-3 px-4 rounded-xl shadow-md transition-all flex items-center justify-center gap-2 disabled:opacity-50 text-xs uppercase tracking-wider mt-2"
+                >
+                  <Plus className="h-4 w-4" /> Publish OTA patch
+                </button>
+              </div>
+            </div>
+
+            {/* Releases Manifest Table */}
+            <div className="lg:col-span-8 bg-slate-950 border border-slate-850 rounded-2xl overflow-hidden">
+              <div className="overflow-x-auto">
+                <table className="w-full text-left border-collapse text-xs">
+                  <thead>
+                    <tr className="bg-slate-900 border-b border-slate-850 text-[10px] text-slate-400 font-extrabold uppercase tracking-widest">
+                      <th className="p-3 pl-5">Version</th>
+                      <th className="p-3">Deploy Status</th>
+                      <th className="p-3">SHA-256 Hash</th>
+                      <th className="p-3">Created</th>
+                      <th className="p-3 text-right pr-5">Control Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-850 text-slate-300">
+                    {releases.length === 0 ? (
+                      <tr>
+                        <td colSpan={5} className="text-center p-6 text-slate-500 font-mono">
+                          No release history tracked.
+                        </td>
+                      </tr>
+                    ) : (
+                      releases.map((rel) => (
+                        <tr key={rel.id} className="hover:bg-slate-900/10 transition-all">
+                          {/* Version */}
+                          <td className="p-3 pl-5">
+                            <span className="font-mono font-black text-violet-400 bg-violet-950/20 border border-violet-500/10 px-2 py-1 rounded-lg">
+                              v{rel.version}
+                            </span>
+                          </td>
+
+                          {/* Active Toggle */}
+                          <td className="p-3">
+                            {rel.is_active ? (
+                              <span className="inline-flex items-center gap-1 bg-emerald-500/15 border border-emerald-500/20 text-emerald-400 px-2 py-0.5 rounded-full uppercase text-[9px] font-extrabold tracking-wider">
+                                Active Release
+                              </span>
+                            ) : (
+                              <span className="inline-flex items-center gap-1 bg-slate-800 text-slate-500 px-2 py-0.5 rounded-full uppercase text-[9px] font-extrabold tracking-wider">
+                                Archived
+                              </span>
+                            )}
+                          </td>
+
+                          {/* Hash */}
+                          <td className="p-3 max-w-[180px]">
+                            <div className="font-mono text-slate-500 truncate" title={rel.sha256}>
+                              {rel.sha256}
+                            </div>
+                          </td>
+
+                          {/* Date */}
+                          <td className="p-3 text-slate-500 font-mono">
+                            {rel.created_at ? new Date(rel.created_at).toLocaleDateString() : '—'}
+                          </td>
+
+                          {/* Actions */}
+                          <td className="p-3 text-right pr-5">
+                            <div className="flex items-center justify-end gap-2">
+                              {/* Toggle active button */}
+                              <button
+                                onClick={() => handleToggleReleaseActive(rel.id, rel.is_active, rel.version)}
+                                disabled={isPending}
+                                title={rel.is_active ? "Deactivate auto-updates for this version" : "Deploys this version to all clients!"}
+                                className={`p-1.5 border rounded-lg transition-all ${
+                                  rel.is_active 
+                                    ? 'bg-emerald-950/20 border-emerald-500/30 text-emerald-400 hover:text-emerald-300' 
+                                    : 'bg-slate-900 border-slate-800 text-slate-500 hover:text-slate-300'
+                                }`}
+                              >
+                                {rel.is_active ? <ToggleRight className="h-4 w-4" /> : <ToggleLeft className="h-4 w-4" />}
+                              </button>
+
+                              {/* Delete release */}
+                              <button
+                                onClick={() => handleDeleteRelease(rel.id, rel.version)}
+                                disabled={isPending || rel.is_active}
+                                title="Delete update"
+                                className="p-1.5 bg-slate-900 border border-slate-800 hover:border-rose-500/30 text-slate-500 hover:text-rose-500 rounded-lg transition-all disabled:opacity-40"
+                              >
+                                <Trash2 className="h-3.5 w-3.5" />
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </section>
 
         {/* Generator Controls & Table Filters Row */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">

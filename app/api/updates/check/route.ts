@@ -1,23 +1,39 @@
 import { NextResponse } from 'next/server';
+import postgres from 'postgres';
+
+const sql = postgres(process.env.POSTGRES_URL!, { ssl: 'require' });
 
 export async function GET(request: Request) {
-  const { searchParams } = new URL(request.url);
-  const version = searchParams.get('version');
-  const platform = searchParams.get('platform');
+  try {
+    const { searchParams } = new URL(request.url);
+    const version = searchParams.get('version');
+    
+    // Fetch the latest active release from the database
+    const [latestRelease] = await sql`
+      SELECT version, download_url, sha256 
+      FROM releases 
+      WHERE is_active = true 
+      ORDER BY created_at DESC 
+      LIMIT 1
+    `;
 
-  // In a real application, you would query your database or a manifest file
-  // to determine if an update is available.
-  const latestVersion = "1.3.0";
+    if (!latestRelease) {
+      return NextResponse.json({ update_available: false, message: 'No active releases available' });
+    }
 
-  if (!version || version === latestVersion) {
-    return NextResponse.json({ update_available: false });
+    if (!version || version === latestRelease.version) {
+      return NextResponse.json({ update_available: false });
+    }
+
+    return NextResponse.json({
+      update_available: true,
+      latest_version: latestRelease.version,
+      required_update: false,
+      download_url: latestRelease.download_url,
+      sha256: latestRelease.sha256
+    });
+  } catch (error: any) {
+    console.error('Error checking updates:', error);
+    return NextResponse.json({ error: 'Internal server error checking updates' }, { status: 500 });
   }
-
-  return NextResponse.json({
-    update_available: true,
-    latest_version: latestVersion,
-    required_update: false,
-    download_url: `https://cdn.filemaster.enterprise/updates/v${latestVersion}/${platform?.toLowerCase()}_patch.zip`,
-    sha256: "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
-  });
 }

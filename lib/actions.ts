@@ -153,3 +153,87 @@ export async function deleteLicenseAction(licenseId: string) {
 export async function logoutAction() {
   await signOut({ redirectTo: '/' });
 }
+
+
+/**
+ * Add / Publish a new release version for Over-The-Air updates
+ */
+export async function createReleaseAction(version: string, downloadUrl: string, sha256: string, makeActive: boolean) {
+  try {
+    await checkAdminAuth();
+
+    if (!version || !downloadUrl || !sha256) {
+      throw new Error('All fields (version, download URL, SHA-256) are required.');
+    }
+
+    // Insert new release
+    await sql`
+      INSERT INTO releases (version, download_url, sha256, is_active)
+      VALUES (${version}, ${downloadUrl}, ${sha256}, ${makeActive})
+    `;
+
+    // If making it active, turn off other releases' active status
+    if (makeActive) {
+      await sql`
+        UPDATE releases
+        SET is_active = false
+        WHERE version != ${version}
+      `;
+    }
+
+    revalidatePath('/admin');
+    return { success: true };
+  } catch (error: any) {
+    console.error('Failed to create release:', error);
+    return { success: false, error: error.message || 'Failed to create release' };
+  }
+}
+
+/**
+ * Toggle Active Status of a release
+ */
+export async function toggleReleaseActiveAction(releaseId: string, currentStatus: boolean) {
+  try {
+    await checkAdminAuth();
+
+    const newStatus = !currentStatus;
+
+    if (newStatus) {
+      // First, set all other releases to inactive
+      await sql`
+        UPDATE releases
+        SET is_active = false
+      `;
+    }
+
+    await sql`
+      UPDATE releases
+      SET is_active = ${newStatus}
+      WHERE id = ${releaseId}
+    `;
+
+    revalidatePath('/admin');
+    return { success: true };
+  } catch (error: any) {
+    console.error('Failed to toggle release active status:', error);
+    return { success: false, error: error.message || 'Failed to toggle active status' };
+  }
+}
+
+/**
+ * Delete a release from the update manifest
+ */
+export async function deleteReleaseAction(releaseId: string) {
+  try {
+    await checkAdminAuth();
+    await sql`
+      DELETE FROM releases
+      WHERE id = ${releaseId}
+    `;
+    revalidatePath('/admin');
+    return { success: true };
+  } catch (error: any) {
+    console.error('Failed to delete release:', error);
+    return { success: false, error: error.message || 'Failed to delete release' };
+  }
+}
